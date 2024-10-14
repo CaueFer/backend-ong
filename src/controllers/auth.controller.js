@@ -10,6 +10,8 @@ let metaFixaTable = 'metasfixas';
 
 const secretKey = "STRINGMTFODA";
 
+
+
 exports.getUser = (req, res) => {
   const token = req.headers.authorization;
   if (!token) {
