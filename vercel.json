@@ -12,14 +12,18 @@
       "dest": "/src/server.js"
     }
   ],
-  "rewrites": [
-    { "source": "/api-docs", "destination": "/api-docs/index.html" }
-  ],
   "headers": [
     {
       "source": "/api-docs/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
       ]
     }
   ]
