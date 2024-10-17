@@ -7,7 +7,6 @@ const indexRouter = require("./routes/indexRouter.js");
 
 const app = express();
 
-// Opções para o Swagger
 const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
@@ -30,7 +29,6 @@ const swaggerOptions = {
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
-console.log(swaggerDocs);
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
