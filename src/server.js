@@ -21,7 +21,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: "https://backend-ong.vercel.app",
+        url: "https://backend-ong.vercel.app/i",
       },
     ],
   },
@@ -30,7 +30,7 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use("/api", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use(express.json());
 app.use(cors());

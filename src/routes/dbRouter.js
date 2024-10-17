@@ -164,7 +164,7 @@ dbRouter.post("/addMemberToFamilia", mysqlController.addMemberToFamilia);
  * /updateQntdInDoacao:
  *   put:
  *     summary: Atualizar quantidade em uma doação
- *     description:" Enviar isso no body => { qntd, tipoMov, doacao_id }"
+ *     description: "Enviar isso no body => { qntd, tipoMov, doacao_id }"
  *     tags: [Doações]
  *     responses:
  *       200:
