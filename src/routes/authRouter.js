@@ -14,7 +14,7 @@ const authController = require("../controllers/auth.controller.js");
  * /getUser:
  *   get:
  *     summary: Obter informações do usuário
- *     description: Enviar o JWT TOKEN para o servidor, ele retorna as informacoes do usuario.
+ *     description: Enviar o JWT TOKEN para o servidor, ele retorna as informações do usuário.
  *     tags: [User]
  *     security:
  *       - bearerAuth: []
