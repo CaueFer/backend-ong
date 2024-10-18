@@ -1,16 +1,27 @@
-const { vault_v1 } = require("googleapis");
 const mysql = require("mysql2");
 
-const connection = mysql.createConnection(
-  "mysql://root:XcrfzIUAMpoSFTAfjcoMQKHMpFWTNsOF@junction.proxy.rlwy.net:15480/railway"
-);
-
-connection.connect((err) => {
-  if (err) {
-    console.error("Erro ao conectar ao MySQL:", err.code, err.message);
-    return;
-  }
-  console.log("DB connected");
+const pool = mysql.createPool({
+  host: "junction.proxy.rlwy.net",
+  user: "root",
+  password: "XcrfzIUAMpoSFTAfjcoMQKHMpFWTNsOF",
+  database: "railway",
+  port: 15480,
+  connectionLimit: 10, // Número máximo de conexões no pool
+  waitForConnections: true, 
+  connectTimeout: 60000,
+  multipleStatements: true, // Permite múltiplas instruções em uma única query
 });
 
-module.exports = connection;
+
+// Mantém a conexão ativa
+setInterval(() => {
+  pool.query("SELECT 1", (err, results) => {
+    if (err) {
+      console.error("Erro ao manter a conexão viva:", err);
+    } else {
+      console.log("Conexão mantida");
+    }
+  });
+}, 30000);
+
+module.exports = pool;
