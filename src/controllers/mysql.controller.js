@@ -1,14 +1,12 @@
 const db = require("../db");
 
-const tables = {
-  doacoes: "doacoes",
-  historicos: "historicos",
-  users: "users",
-  familias: "familias",
-  metasfixas: "metasfixas",
-  enderecos: "enderecos",
-  membrosfml: "membrosfml",
-};
+let doacoesTable = "doacoes";
+let historicosTable = "historicos";
+let userTable = "users";
+let familiaTable = "familias";
+let metaFixaTable = "metasfixas";
+let enderecoTable = "enderecos";
+let memberTable = "membrosfml";
 
 const executeQuery = (query, params = []) => {
   return new Promise((resolve, reject) => {
@@ -24,7 +22,7 @@ const executeQuery = (query, params = []) => {
 
 exports.getDoacao = async (req, res) => {
   try {
-    const results = await executeQuery(`SELECT * FROM ${tables.doacoes}`);
+    const results = await executeQuery(`SELECT * FROM ${doacoesTable}`);
     res.status(200).json(results);
   } catch (error) {
     console.error("Erro ao obter doações:", error);
@@ -36,7 +34,7 @@ exports.getSingleDoacao = async (req, res) => {
   const { id } = req.query;
   try {
     const results = await executeQuery(
-      `SELECT * FROM ${tables.doacoes} WHERE id = ?`,
+      `SELECT * FROM ${doacoesTable} WHERE id = ?`,
       [id]
     );
     if (results.length === 0) {
@@ -51,7 +49,7 @@ exports.getSingleDoacao = async (req, res) => {
 
 exports.getHistorico = async (req, res) => {
   try {
-    const results = await executeQuery(`SELECT * FROM ${tables.historicos}`);
+    const results = await executeQuery(`SELECT * FROM ${historicosTable}`);
     res.status(200).json(results);
   } catch (error) {
     console.error("Erro ao obter históricos:", error);
@@ -61,7 +59,7 @@ exports.getHistorico = async (req, res) => {
 
 exports.getFamilias = async (req, res) => {
   try {
-    const results = await executeQuery(`SELECT * FROM ${tables.familias}`);
+    const results = await executeQuery(`SELECT * FROM ${familiaTable}`);
     res.status(200).json(results);
   } catch (error) {
     console.error("Erro ao obter famílias:", error);
@@ -71,7 +69,7 @@ exports.getFamilias = async (req, res) => {
 
 exports.getMembros = async (req, res) => {
   try {
-    const results = await executeQuery(`SELECT * FROM ${tables.membrosfml}`);
+    const results = await executeQuery(`SELECT * FROM ${memberTable}`);
     res.status(200).json(results);
   } catch (error) {
     console.error("Erro ao obter membros:", error);
@@ -79,45 +77,51 @@ exports.getMembros = async (req, res) => {
   }
 };
 
-exports.getMetaFixa = async (req, res) => {
-  const { id } = req.query;
-  try {
-    const results = await executeQuery(
-      `SELECT * FROM ${tables.metasfixas} WHERE id = ?`,
-      [id]
-    );
-    res.status(200).json(results);
-  } catch (error) {
-    console.error("Erro ao obter meta fixa:", error);
-    res.status(500).json("Erro ao obter meta fixa");
-  }
+exports.getMetaFixa = (req, res) => {
+  const id = req.query.id;
+
+  db.query(
+    "SELECT * FROM " + metaFixaTable + " WHERE id = ?",
+    id,
+    (error, results, fields) => {
+      if (error) {
+        console.error("Erro ao obter dados:", error);
+        res.status(500).json("Erro ao obter os dados");
+        return;
+      }
+      res.status(200).json(results);
+    }
+  );
 };
 
-exports.getHistoricoByCategoria = async (req, res) => {
-  const { categoria } = req.query;
+exports.getHistoricoByCategoria = (req, res) => {
+  const categoria = req.query.categoria;
+
   const query = `
-    SELECT ${tables.historicos}.* 
-    FROM ${tables.historicos}
-    JOIN ${tables.doacoes} ON ${tables.historicos}.doacao_id = ${tables.doacoes}.id
-    WHERE ${tables.doacoes}.categoria = ?;
+    SELECT ${historicoTable}.*
+    FROM ${historicoTable}
+    JOIN ${doacaoTable} ON ${historicoTable}.doacao_id = ${doacaoTable}.id
+    WHERE ${doacaoTable}.categoria = ?;
   `;
-  try {
-    const results = await executeQuery(query, [categoria]);
-    res.status(200).json(results);
-  } catch (error) {
-    console.error("Erro ao obter histórico por categoria:", error);
-    res.status(500).json({ error: "Erro ao obter histórico por categoria" });
-  }
+
+  db.query(query, [categoria], (error, results) => {
+    if (error) {
+      console.error("Erro ao obter histórico por categoria:", error);
+      res.status(500).json({ error: "Erro ao obter histórico por categoria" });
+      return;
+    }
+    res.json(results);
+  });
 };
 
 exports.getTableLength = async (req, res) => {
-  const query = `
-    SELECT
-      (SELECT COUNT(*) FROM ${tables.familias}) AS total_familias,
-      (SELECT COUNT(*) FROM ${tables.doacoes}) AS total_doacoes,
-      (SELECT COUNT(*) FROM ${tables.historicos}) AS total_historicos
-  `;
   try {
+    const query = `
+      SELECT
+        (SELECT COUNT(*) FROM ${familiaTable}) AS total_familias,
+        (SELECT COUNT(*) FROM ${doacoesTable}) AS total_doacoes,
+        (SELECT COUNT(*) FROM ${historicosTable}) AS total_historicos
+    `;
     const results = await executeQuery(query);
     const tableLengths = {
       totalFamilias: results[0].total_familias,
@@ -134,7 +138,7 @@ exports.getTableLength = async (req, res) => {
 exports.addMembro = async (req, res) => {
   const data = req.body;
   try {
-    const result = await executeQuery(`INSERT INTO ${tables.membrosfml} SET ?`, [
+    const result = await executeQuery(`INSERT INTO ${memberTable} SET ?`, [
       data,
     ]);
     res.status(201).json({
@@ -150,7 +154,7 @@ exports.addMembro = async (req, res) => {
 exports.addDoacao = async (req, res) => {
   const data = req.body;
   try {
-    const result = await executeQuery(`INSERT INTO ${tables.doacoes} SET ?`, [
+    const result = await executeQuery(`INSERT INTO ${doacoesTable} SET ?`, [
       data,
     ]);
     res.status(201).json({
@@ -166,7 +170,7 @@ exports.addDoacao = async (req, res) => {
 exports.addHistorico = async (req, res) => {
   const data = req.body;
   try {
-    await executeQuery(`INSERT INTO ${tables.historicos} SET ?`, [data]);
+    await executeQuery(`INSERT INTO ${historicosTable} SET ?`, [data]);
     res.status(201).json("Histórico adicionado com sucesso");
   } catch (error) {
     console.error("Erro ao adicionar histórico:", error);
@@ -174,7 +178,7 @@ exports.addHistorico = async (req, res) => {
   }
 };
 
-exports.addFamilia = async (req, res) => {
+exports.addFamilia = (req, res) => {
   const {
     respName,
     respSobrenome,
@@ -184,12 +188,15 @@ exports.addFamilia = async (req, res) => {
     familyDesc,
     endereco_id,
   } = req.body;
+
   const query = `
-    INSERT INTO ${tables.familias} (resp_name, resp_sobrenome, resp_cpf, resp_email, resp_telefone, familyDesc, endereco_id)
+    INSERT INTO ${familyTable} (resp_name, resp_sobrenome, resp_cpf, resp_email, resp_telefone, familyDesc, endereco_id)
     VALUES (?, ?, ?, ?, ?, ?, ?);
   `;
-  try {
-    const result = await executeQuery(query, [
+
+  db.query(
+    query,
+    [
       respName,
       respSobrenome,
       respCpf,
@@ -197,19 +204,49 @@ exports.addFamilia = async (req, res) => {
       respTelefone,
       familyDesc,
       endereco_id,
+    ],
+    (err, result) => {
+      if (err) {
+        console.error("Erro ao adicionar família:", err);
+        return res.status(500).send({ error: "Erro ao adicionar família" });
+      }
+      // Resposta com ID da nova família inserida
+      res.status(201).send({ id: result.insertId });
+    }
+  );
+};
+
+exports.addMemberToFamilia = async (req, res) => {
+  try {
+    const { familyId, newMembers } = req.body;
+    const familia_id = familyId;
+
+    const values = newMembers.map((member) => [
+      familia_id,
+      member.membro,
+      member.genero,
+      member.idade,
     ]);
-    res.status(201).json({ id: result.insertId });
+
+    const query = `
+      INSERT INTO ${memberTable} (familia_id, membro, genero, idade) VALUES ?;
+    `;
+
+    const result = await db.query(query, [values]);
+
+    res.status(201).send({ affectedRows: result.affectedRows });
   } catch (err) {
-    console.error("Erro ao adicionar família:", err);
-    res.status(500).json("Erro ao adicionar família");
+    console.error("Erro ao adicionar membro à família:", err);
+    res.status(500).send({ error: "Erro ao adicionar membro à família" });
   }
 };
 
 exports.addAddress = async (req, res) => {
-  const { street, number, neighborhood, city, state, zipcode, complement } = req.body;
+  const { street, number, neighborhood, city, state, zipcode, complement } =
+    req.body;
   try {
     const checkQuery = `
-      SELECT * FROM ${tables.enderecos}
+      SELECT * FROM ${enderecoTable} 
       WHERE street = ? AND number = ? AND neighborhood = ? AND city = ? AND state = ? AND zipcode = ?
     `;
     const existingAddress = await executeQuery(checkQuery, [
@@ -220,11 +257,12 @@ exports.addAddress = async (req, res) => {
       state,
       zipcode,
     ]);
+
     if (existingAddress.length > 0) {
       return res.status(200).json({ id: existingAddress[0].endereco_id });
     } else {
       const insertQuery = `
-        INSERT INTO ${tables.enderecos} (street, number, neighborhood, city, state, zipcode, complemento)
+        INSERT INTO ${enderecoTable} (street, number, neighborhood, city, state, zipcode, complemento)
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `;
       const result = await executeQuery(insertQuery, [
@@ -247,27 +285,229 @@ exports.addAddress = async (req, res) => {
 exports.updateQntdInDoacao = async (req, res) => {
   const { qntd, tipoMov, doacao_id } = req.body;
   const quantidadeNova = parseInt(qntd, 10);
+
   try {
     const [doacao] = await executeQuery(
-      `SELECT qntd FROM ${tables.doacoes} WHERE id = ?`,
+      `SELECT qntd FROM ${doacoesTable} WHERE id = ?`,
       [doacao_id]
     );
+
     if (!doacao) {
       return res.status(404).json("Doação não encontrada");
     }
+
     const quantidadeAtual = doacao.qntd;
-    let novaQuantidade = tipoMov === "entrada"
-      ? quantidadeAtual + quantidadeNova
-      : quantidadeAtual - quantidadeNova;
+    let novaQuantidade =
+      tipoMov === "entrada"
+        ? quantidadeAtual + quantidadeNova
+        : quantidadeAtual - quantidadeNova;
     novaQuantidade = Math.max(novaQuantidade, 0);
 
-    await executeQuery(`UPDATE ${tables.doacoes} SET qntd = ? WHERE id = ?`, [
+    await executeQuery(`UPDATE ${doacoesTable} SET qntd = ? WHERE id = ?`, [
       novaQuantidade,
       doacao_id,
     ]);
     res.status(200).json("Quantidade do item atualizada com sucesso");
   } catch (error) {
-    console.error("Erro ao atualizar quantidade:", error);
-    res.status(500).json("Erro ao atualizar quantidade do item");
+    console.error("Erro ao atualizar quantidade da doação:", error);
+    res.status(500).json("Erro ao atualizar quantidade da doação");
   }
+};
+
+exports.updateMetaFixa = async (req, res) => {
+  const { id, nome, qntdMetaAll } = req.body;
+  try {
+    await executeQuery(
+      `UPDATE ${metaFixaTable} SET nome = ?, qntdMetaAll = ? WHERE id = ?`,
+      [nome, qntdMetaAll, id]
+    );
+    res.status(200).json("Meta fixa atualizada com sucesso");
+  } catch (error) {
+    console.error("Erro ao atualizar meta fixa:", error);
+    res.status(500).json("Erro ao atualizar meta fixa");
+  }
+};
+
+exports.updateMetaInDoacao = (req, res) => {
+  const { metaQntd, metaDate, doacao_id } = req.body;
+
+  // Convertendo para número, se fornecido
+  const qntdNova = metaQntd ? parseInt(metaQntd, 10) : null;
+
+  const query = `
+    UPDATE ${doacaoTable}
+    SET metaQntd = ?, metaDate = ?
+    WHERE id = ?;
+  `;
+
+  db.query(query, [qntdNova, metaDate, doacao_id], (error, results) => {
+    if (error) {
+      console.error("Erro ao atualizar meta do item:", error);
+      return res.status(500).json({ error: "Erro ao atualizar meta do item" });
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "Doação não encontrada" });
+    }
+
+    res.status(200).json({ message: "Meta do item atualizada com sucesso" });
+  });
+};
+
+exports.updateDoacao = (req, res) => {
+  const { id, categoria, itemName } = req.body;
+
+  const query = `
+    UPDATE ${doacaoTable}
+    SET categoria = ?, itemName = ?
+    WHERE id = ?;
+  `;
+
+  db.query(query, [categoria, itemName, id], (error, results) => {
+    if (error) {
+      console.error("Erro ao atualizar doação:", error);
+      return res.status(500).json({ error: "Erro ao atualizar doação" });
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: "Doação não encontrada" });
+    }
+
+    res.status(200).json({ message: "Doação atualizada com sucesso" });
+  });
+};
+
+exports.deleteDoacao = async (req, res) => {
+  const { id } = req.query;
+  try {
+    await executeQuery(`DELETE FROM ${doacoesTable} WHERE id = ?`, [id]);
+    res.status(200).json("Doação deletada com sucesso");
+  } catch (error) {
+    console.error("Erro ao deletar doação:", error);
+    res.status(500).json("Erro ao deletar doação");
+  }
+};
+
+exports.deleteMembro = async (req, res) => {
+  const { id } = req.query;
+  try {
+    await executeQuery(`DELETE FROM ${memberTable} WHERE id = ?`, [id]);
+    res.status(200).json("Membro deletado com sucesso");
+  } catch (error) {
+    console.error("Erro ao deletar membro:", error);
+    res.status(500).json("Erro ao deletar membro");
+  }
+};
+exports.deleteMultiHistorico = (req, res) => {
+  const { id } = req.query;
+
+  if (!id) {
+    return res.status(400).json({ error: "ID é obrigatório" });
+  }
+
+  const query = `
+    DELETE FROM ${historicoTable} WHERE doacao_id = ?;
+  `;
+
+  db.query(query, [id], (error, results) => {
+    if (error) {
+      console.error("Erro ao deletar histórico:", error);
+      return res.status(500).json({ error: "Erro ao deletar histórico" });
+    }
+
+    if (results.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ message: "Nenhum histórico encontrado para deletar" });
+    }
+
+    res.status(200).json({ message: "Histórico deletado com sucesso" });
+  });
+};
+
+exports.deleteSingleHistorico = (req, res) => {
+  const { id } = req.query;
+
+  if (!id) {
+    return res.status(400).json({ error: "ID é obrigatório" });
+  }
+
+  const query = `
+    DELETE FROM ${historicoTable} WHERE id = ?;
+  `;
+
+  db.query(query, [id], (error, results) => {
+    if (error) {
+      console.error("Erro ao deletar histórico individual:", error);
+      return res
+        .status(500)
+        .json({ error: "Erro ao deletar histórico individual" });
+    }
+
+    if (results.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ message: "Histórico individual não encontrado" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Histórico individual deletado com sucesso" });
+  });
+};
+
+exports.deleteFamilyById = (req, res) => {
+  const { id: familyId } = req.query;
+
+  if (!familyId) {
+    return res.status(400).json({ error: "ID da família é obrigatório" });
+  }
+
+  // 1. Seleciona os membros da família
+  const selectQuery = `
+    SELECT id FROM ${memberTable} WHERE familia_id = ?;
+  `;
+
+  db.query(selectQuery, [familyId], (error, results) => {
+    if (error) {
+      console.error("Erro ao selecionar membros da família:", error);
+      return res
+        .status(500)
+        .json({ error: "Erro ao selecionar membros da família" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Família não encontrada" });
+    }
+
+    const memberIds = results.map((result) => result.id);
+
+    // 2. Deleta os membros da família
+    const deleteMembersQuery = `
+      DELETE FROM ${memberTable} WHERE familia_id = ?;
+    `;
+
+    db.query(deleteMembersQuery, [familyId], (error) => {
+      if (error) {
+        console.error("Erro ao deletar membros da família:", error);
+        return res
+          .status(500)
+          .json({ error: "Erro ao deletar membros da família" });
+      }
+
+      // 3. Deleta a família
+      const deleteFamilyQuery = `
+        DELETE FROM ${familyTable} WHERE id = ?;
+      `;
+
+      db.query(deleteFamilyQuery, [familyId], (error) => {
+        if (error) {
+          console.error("Erro ao deletar família:", error);
+          return res.status(500).json({ error: "Erro ao deletar família" });
+        }
+
+        res.status(200).json({ message: "Família deletada com sucesso" });
+      });
+    });
+  });
 };
