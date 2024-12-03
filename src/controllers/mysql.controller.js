@@ -100,8 +100,8 @@ exports.getHistoricoByCategoria = (req, res) => {
   const query = `
     SELECT ${historicoTable}.*
     FROM ${historicoTable}
-    JOIN ${doacaoTable} ON ${historicoTable}.doacao_id = ${doacaoTable}.id
-    WHERE ${doacaoTable}.categoria = ?;
+    JOIN ${doacoesTable} ON ${historicoTable}.doacao_id = ${doacoesTable}.id
+    WHERE ${doacoesTable}.categoria = ?;
   `;
 
   db.query(query, [categoria], (error, results) => {
@@ -335,7 +335,7 @@ exports.updateMetaInDoacao = (req, res) => {
   const qntdNova = metaQntd ? parseInt(metaQntd, 10) : null;
 
   const query = `
-    UPDATE ${doacaoTable}
+    UPDATE ${doacoesTable}
     SET metaQntd = ?, metaDate = ?
     WHERE id = ?;
   `;
@@ -358,7 +358,7 @@ exports.updateDoacao = (req, res) => {
   const { id, categoria, itemName } = req.body;
 
   const query = `
-    UPDATE ${doacaoTable}
+    UPDATE ${doacoesTable}
     SET categoria = ?, itemName = ?
     WHERE id = ?;
   `;
