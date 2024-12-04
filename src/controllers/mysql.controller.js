@@ -480,8 +480,6 @@ exports.deleteFamilyById = (req, res) => {
       return res.status(404).json({ message: "Família não encontrada" });
     }
 
-    const memberIds = results.map((result) => result.id);
-
     // 2. Deleta os membros da família
     const deleteMembersQuery = `
       DELETE FROM ${memberTable} WHERE familia_id = ?;

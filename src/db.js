@@ -1,17 +1,19 @@
 const mysql = require("mysql2");
+require("dotenv").config();
+
+console.log(process.env.DB_HOST);
 
 const pool = mysql.createPool({
-  host: "junction.proxy.rlwy.net",
-  user: "root",
-  password: "XcrfzIUAMpoSFTAfjcoMQKHMpFWTNsOF",
-  database: "railway",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database:  process.env.DB_DATABASE,
   port: 15480,
   connectionLimit: 10, // Número máximo de conexões no pool
-  waitForConnections: true, 
+  waitForConnections: true,
   connectTimeout: 60000,
   multipleStatements: true, // Permite múltiplas instruções em uma única query
 });
-
 
 // Mantém a conexão ativa
 setInterval(() => {
