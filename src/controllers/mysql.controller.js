@@ -1,4 +1,4 @@
-const db = require("../db");
+familiaTableconst db = require("../db");
 
 let doacoesTable = "doacoes";
 let historicosTable = "historicos";
@@ -190,7 +190,7 @@ exports.addFamilia = (req, res) => {
   } = req.body;
 
   const query = `
-    INSERT INTO ${familyTable} (resp_name, resp_sobrenome, resp_cpf, resp_email, resp_telefone, familyDesc, endereco_id)
+    INSERT INTO ${familiaTable} (resp_name, resp_sobrenome, resp_cpf, resp_email, resp_telefone, familyDesc, endereco_id)
     VALUES (?, ?, ?, ?, ?, ?, ?);
   `;
 
@@ -497,7 +497,7 @@ exports.deleteFamilyById = (req, res) => {
 
       // 3. Deleta a família
       const deleteFamilyQuery = `
-        DELETE FROM ${familyTable} WHERE id = ?;
+        DELETE FROM ${familiaTable} WHERE id = ?;
       `;
 
       db.query(deleteFamilyQuery, [familyId], (error) => {
