@@ -476,9 +476,9 @@ exports.deleteFamilyById = (req, res) => {
         .json({ error: "Erro ao selecionar membros da família" });
     }
 
-    if (results.length === 0) {
-      return res.status(404).json({ message: "Família não encontrada" });
-    }
+    // if (results.length === 0) {
+    //   return res.status(404).json({ message: "Família não encontrada" });
+    // }
 
     // 2. Deleta os membros da família
     const deleteMembersQuery = `
