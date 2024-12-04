@@ -1,4 +1,4 @@
-familiaTableconst db = require("../db");
+const db = require("../db");
 
 let doacoesTable = "doacoes";
 let historicosTable = "historicos";
